@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinFast Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-connected {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-disconnected {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .button-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .button-success:hover {
+            background: #059669;
+        }
+
+        .button-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background: #dc2626;
+        }
+
+        .button-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .button-secondary:hover {
+            background: #4b5563;
+        }
+
+        .button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #d1d5db;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .switch.active {
+            background: #10b981;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .switch.active::after {
+            transform: translateX(30px);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: #10b981;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+            margin: 20px 0;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 VinFast Control Panel</h1>
+            <p>Manage your VinFast integration settings and controls</p>
+        </div>
+
+        <div class="grid">
+            <!-- Connection Status Card -->
+            <div class="card">
+                <h2>Connection Status</h2>
+                <div id="connectionStatus" class="status-badge status-disconnected">Checking...</div>
+                <div class="control-group">
+                    <div class="info-row">
+                        <span class="info-label">Last Update:</span>
+                        <span class="info-value" id="lastUpdate">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Next Update:</span>
+                        <span class="info-value" id="nextUpdate">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Polling Interval:</span>
+                        <span class="info-value" id="currentInterval">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">OCPP Charger:</span>
+                        <span class="info-value" id="ocppStatus">Not configured</span>
+                    </div>
+                </div>
+                <button class="button button-primary" onclick="refreshData()">
+                    🔄 Refresh Now
+                </button>
+            </div>
+
+            <!-- Polling Configuration Card -->
+            <div class="card">
+                <h2>Polling Configuration</h2>
+                <div class="control-group">
+                    <label for="normalInterval">Normal Update Interval</label>
+                    <select id="normalInterval">
+                        <option value="3600">1 hour (~24/day)</option>
+                        <option value="7200">2 hours (~12/day)</option>
+                        <option value="9000" selected>2.5 hours (~10/day, recommended)</option>
+                        <option value="14400">4 hours (~6/day)</option>
+                        <option value="21600">6 hours (~4/day)</option>
+                        <option value="28800">8 hours (~3/day)</option>
+                        <option value="43200">12 hours (~2/day)</option>
+                    </select>
+                    <div class="help-text">How often to poll when vehicle is idle</div>
+                </div>
+                <div class="control-group">
+                    <label for="chargingInterval">Charging Update Interval</label>
+                    <select id="chargingInterval">
+                        <option value="300" selected>5 minutes (recommended)</option>
+                        <option value="600">10 minutes</option>
+                        <option value="900">15 minutes</option>
+                        <option value="1800">30 minutes</option>
+                    </select>
+                    <div class="help-text">How often to poll when charging via OCPP</div>
+                </div>
+                <div class="control-group">
+                    <label for="ocppEntity">OCPP Charger Entity (Optional)</label>
+                    <input type="text" id="ocppEntity" placeholder="sensor.charger_status_connector">
+                    <div class="help-text">Entity to monitor for charging state</div>
+                </div>
+                <div class="control-group">
+                    <label for="ocppChargingState">OCPP Charging State</label>
+                    <input type="text" id="ocppChargingState" value="Charging" placeholder="Charging">
+                    <div class="help-text">State value that indicates charging</div>
+                </div>
+                <button class="button button-success" onclick="savePollingConfig()">
+                    💾 Save Configuration
+                </button>
+            </div>
+
+            <!-- OCPP Charger Control Card -->
+            <div class="card" id="ocppCard" style="display: none;">
+                <h2>OCPP Charger Control</h2>
+                <div id="ocppChargerStatus" class="status-badge status-warning">Unknown</div>
+                <div class="control-group">
+                    <div class="info-row">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value" id="chargerStatus">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Power:</span>
+                        <span class="info-value" id="chargerPower">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Energy (Session):</span>
+                        <span class="info-value" id="chargerEnergy">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Max Current:</span>
+                        <span class="info-value" id="chargerCurrent">--</span>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="switch-container">
+                    <span>Charger Availability</span>
+                    <div class="switch" id="availabilitySwitch" onclick="toggleAvailability()"></div>
+                </div>
+                <div class="switch-container">
+                    <span>Charge Control</span>
+                    <div class="switch" id="chargeControlSwitch" onclick="toggleChargeControl()"></div>
+                </div>
+                <div class="control-group" style="margin-top: 15px;">
+                    <label for="maxCurrent">Maximum Current (Amps)</label>
+                    <input type="number" id="maxCurrent" min="6" max="48" step="1" placeholder="32">
+                    <button class="button button-secondary" onclick="setMaxCurrent()" style="margin-top: 10px;">
+                        Set Max Current
+                    </button>
+                </div>
+            </div>
+
+            <!-- Climate Control Card -->
+            <div class="card" id="climateCard" style="display: none;">
+                <h2>Climate Control</h2>
+                <div id="climateStatus" class="status-badge status-warning">Not Paired</div>
+                <div class="control-group">
+                    <div class="info-row">
+                        <span class="info-label">Inside Temp:</span>
+                        <span class="info-value" id="insideTemp">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Outside Temp:</span>
+                        <span class="info-value" id="outsideTemp">--</span>
+                    </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="switch-container">
+                    <span>Climate Control</span>
+                    <div class="switch" id="climateSwitch" onclick="toggleClimate()"></div>
+                </div>
+                <div class="help-text" style="margin-top: 15px;">
+                    ⚠️ Climate control requires remote control pairing. 
+                    Configure pairing in Home Assistant integration options.
+                </div>
+            </div>
+
+            <!-- Vehicle Information Card -->
+            <div class="card">
+                <h2>Vehicle Information</h2>
+                <div class="control-group">
+                    <div class="info-row">
+                        <span class="info-label">Battery:</span>
+                        <span class="info-value" id="batteryLevel">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Range:</span>
+                        <span class="info-value" id="range">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Odometer:</span>
+                        <span class="info-value" id="odometer">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Charging Status:</span>
+                        <span class="info-value" id="chargingStatus">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Lock Status:</span>
+                        <span class="info-value" id="lockStatus">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Configuration - UPDATE THESE for your Home Assistant instance
+        const HA_URL = 'http://homeassistant.local:8123'; // Change to your HA URL
+        const HA_TOKEN = 'YOUR_LONG_LIVED_ACCESS_TOKEN'; // Get from HA Profile → Long-Lived Access Tokens
+        const VINFAST_ENTITY_PREFIX = 'sensor.vinfast'; // Change to match your entity prefix
+        const OCPP_ENTITY_PREFIX = 'sensor.charger'; // Change to match your OCPP entity prefix
+
+        // State
+        let updateInterval = null;
+        let climateSwitchState = false;
+        let availabilitySwitchState = false;
+        let chargeControlSwitchState = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkConnection();
+            loadConfiguration();
+            startAutoRefresh();
+        });
+
+        // API Helper
+        async function haApiCall(service, entityId = null, data = {}) {
+            try {
+                const url = `${HA_URL}/api/services/${service}`;
+                const payload = entityId ? { entity_id: entityId, ...data } : data;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${HA_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('HA API Error:', error);
+                showToast('Error: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        async function haGetState(entityId) {
+            try {
+                const response = await fetch(`${HA_URL}/api/states/${entityId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${HA_TOKEN}`
+                    }
+                });
+
+                if (!response.ok) {
+                    return null;
+                }
+
+                const data = await response.json();
+                return data.state !== 'unavailable' ? data : null;
+            } catch (error) {
+                console.error('Get state error:', error);
+                return null;
+            }
+        }
+
+        // Connection Status
+        async function checkConnection() {
+            try {
+                const batteryState = await haGetState(`${VINFAST_ENTITY_PREFIX}_battery_level`);
+                
+                if (batteryState) {
+                    document.getElementById('connectionStatus').textContent = 'Connected';
+                    document.getElementById('connectionStatus').className = 'status-badge status-connected';
+                    updateVehicleInfo();
+                } else {
+                    document.getElementById('connectionStatus').textContent = 'Disconnected';
+                    document.getElementById('connectionStatus').className = 'status-badge status-disconnected';
+                }
+            } catch (error) {
+                document.getElementById('connectionStatus').textContent = 'Error';
+                document.getElementById('connectionStatus').className = 'status-badge status-disconnected';
+            }
+        }
+
+        // Update Vehicle Information
+        async function updateVehicleInfo() {
+            const entities = {
+                batteryLevel: `${VINFAST_ENTITY_PREFIX}_battery_level`,
+                range: `${VINFAST_ENTITY_PREFIX}_range`,
+                odometer: `${VINFAST_ENTITY_PREFIX}_odometer`,
+                chargingStatus: `${VINFAST_ENTITY_PREFIX}_charging_status`,
+                lockStatus: `binary_sensor.vinfast_locked`,
+                insideTemp: `${VINFAST_ENTITY_PREFIX}_inside_temp`,
+                outsideTemp: `${VINFAST_ENTITY_PREFIX}_outside_temp`
+            };
+
+            for (const [key, entityId] of Object.entries(entities)) {
+                const state = await haGetState(entityId);
+                const element = document.getElementById(key);
+                if (element && state) {
+                    element.textContent = state.state + (state.attributes.unit_of_measurement || '');
+                }
+            }
+
+            // Update last update time
+            const batteryState = await haGetState(entities.batteryLevel);
+            if (batteryState && batteryState.last_updated) {
+                const lastUpdate = new Date(batteryState.last_updated);
+                document.getElementById('lastUpdate').textContent = formatTime(lastUpdate);
+            }
+        }
+
+        // OCPP Controls
+        async function updateOCPPStatus() {
+            const statusEntity = await haGetState(`${OCPP_ENTITY_PREFIX}_status_connector`);
+            const powerEntity = await haGetState(`${OCPP_ENTITY_PREFIX}_power_active_import`);
+            const energyEntity = await haGetState(`${OCPP_ENTITY_PREFIX}_energy_session`);
+            const currentEntity = await haGetState(`number.charger_maximum_current`);
+
+            if (statusEntity) {
+                document.getElementById('ocppCard').style.display = 'block';
+                document.getElementById('chargerStatus').textContent = statusEntity.state;
+                document.getElementById('chargerPower').textContent = 
+                    (powerEntity ? powerEntity.state + ' kW' : '--');
+                document.getElementById('chargerEnergy').textContent = 
+                    (energyEntity ? energyEntity.state + ' kWh' : '--');
+                document.getElementById('chargerCurrent').textContent = 
+                    (currentEntity ? currentEntity.state + ' A' : '--');
+
+                // Update switches
+                const availabilityState = await haGetState('switch.charger_availability');
+                const chargeControlState = await haGetState('switch.charger_charge_control');
+                
+                if (availabilityState) {
+                    availabilitySwitchState = availabilityState.state === 'on';
+                    document.getElementById('availabilitySwitch').classList.toggle('active', availabilitySwitchState);
+                }
+                
+                if (chargeControlState) {
+                    chargeControlSwitchState = chargeControlState.state === 'on';
+                    document.getElementById('chargeControlSwitch').classList.toggle('active', chargeControlSwitchState);
+                }
+
+                document.getElementById('ocppStatus').textContent = 'Connected';
+            } else {
+                document.getElementById('ocppStatus').textContent = 'Not configured';
+            }
+        }
+
+        async function toggleAvailability() {
+            try {
+                const newState = !availabilitySwitchState;
+                await haApiCall('switch/turn_' + (newState ? 'on' : 'off'), 'switch.charger_availability');
+                availabilitySwitchState = newState;
+                document.getElementById('availabilitySwitch').classList.toggle('active', newState);
+                showToast(`Charger ${newState ? 'enabled' : 'disabled'}`, 'success');
+            } catch (error) {
+                showToast('Failed to toggle availability', 'error');
+            }
+        }
+
+        async function toggleChargeControl() {
+            try {
+                const newState = !chargeControlSwitchState;
+                await haApiCall('switch/turn_' + (newState ? 'on' : 'off'), 'switch.charger_charge_control');
+                chargeControlSwitchState = newState;
+                document.getElementById('chargeControlSwitch').classList.toggle('active', newState);
+                showToast(`Charging ${newState ? 'started' : 'stopped'}`, 'success');
+            } catch (error) {
+                showToast('Failed to toggle charge control', 'error');
+            }
+        }
+
+        async function setMaxCurrent() {
+            const value = parseInt(document.getElementById('maxCurrent').value);
+            if (isNaN(value) || value < 6 || value > 48) {
+                showToast('Please enter a value between 6 and 48', 'error');
+                return;
+            }
+
+            try {
+                await haApiCall('number/set_value', 'number.charger_maximum_current', { value });
+                showToast(`Max current set to ${value}A`, 'success');
+                updateOCPPStatus();
+            } catch (error) {
+                showToast('Failed to set max current', 'error');
+            }
+        }
+
+        // Climate Control
+        async function updateClimateStatus() {
+            const climateState = await haGetState('switch.vinfast_climate');
+            if (climateState) {
+                document.getElementById('climateCard').style.display = 'block';
+                climateSwitchState = climateState.state === 'on';
+                document.getElementById('climateSwitch').classList.toggle('active', climateSwitchState);
+                document.getElementById('climateStatus').textContent = 'Paired';
+                document.getElementById('climateStatus').className = 'status-badge status-connected';
+            }
+        }
+
+        async function toggleClimate() {
+            try {
+                const newState = !climateSwitchState;
+                await haApiCall('switch/turn_' + (newState ? 'on' : 'off'), 'switch.vinfast_climate');
+                climateSwitchState = newState;
+                document.getElementById('climateSwitch').classList.toggle('active', newState);
+                showToast(`Climate ${newState ? 'on' : 'off'}`, 'success');
+            } catch (error) {
+                showToast('Failed to toggle climate', 'error');
+            }
+        }
+
+        // Configuration
+        async function loadConfiguration() {
+            // Load from localStorage or HA config
+            const saved = localStorage.getItem('vinfastConfig');
+            if (saved) {
+                const config = JSON.parse(saved);
+                document.getElementById('normalInterval').value = config.normalInterval || 9000;
+                document.getElementById('chargingInterval').value = config.chargingInterval || 300;
+                document.getElementById('ocppEntity').value = config.ocppEntity || '';
+                document.getElementById('ocppChargingState').value = config.ocppChargingState || 'Charging';
+            }
+        }
+
+        async function savePollingConfig() {
+            const config = {
+                normalInterval: parseInt(document.getElementById('normalInterval').value),
+                chargingInterval: parseInt(document.getElementById('chargingInterval').value),
+                ocppEntity: document.getElementById('ocppEntity').value,
+                ocppChargingState: document.getElementById('ocppChargingState').value
+            };
+
+            localStorage.setItem('vinfastConfig', JSON.stringify(config));
+            
+            // Note: Actual HA config update requires integration options flow
+            // This is a placeholder - you'd need to implement HA config_flow API call
+            showToast('Configuration saved locally. Update in HA integration options to apply.', 'success');
+        }
+
+        // Refresh
+        async function refreshData() {
+            try {
+                // Trigger coordinator refresh via service call
+                await haApiCall('homeassistant/update_entity', null, {
+                    entity_id: `${VINFAST_ENTITY_PREFIX}_battery_level`
+                });
+                showToast('Refresh triggered', 'success');
+                setTimeout(() => {
+                    checkConnection();
+                    updateVehicleInfo();
+                    updateOCPPStatus();
+                    updateClimateStatus();
+                }, 2000);
+            } catch (error) {
+                showToast('Failed to refresh', 'error');
+            }
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            updateInterval = setInterval(() => {
+                checkConnection();
+                updateVehicleInfo();
+                updateOCPPStatus();
+                updateClimateStatus();
+            }, 30000); // Every 30 seconds
+        }
+
+        // Utility Functions
+        function formatTime(date) {
+            return date.toLocaleTimeString();
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>

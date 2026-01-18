@@ -1,0 +1,27 @@
+{
+  "name": "vinfast-control-panel",
+  "version": "1.0.0",
+  "description": "VinFast Control Panel with CORS proxy server",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "vinfast",
+    "ev",
+    "control-panel",
+    "cors-proxy"
+  ],
+  "author": "",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "dependencies": {
+    "node-forge": "^1.3.1"
+  }
+}

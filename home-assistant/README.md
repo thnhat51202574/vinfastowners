@@ -121,6 +121,7 @@ Edit these values in `configuration/ocpp_sensors.yaml`:
 
 ```
 ├── README.md
+├── ARCHITECTURE.md                 # Architecture review and documentation
 ├── custom_components/
 │   └── vinfast/                    # VinFast Connected Car integration (REQUIRED)
 │       ├── __init__.py
@@ -136,7 +137,10 @@ Edit these values in `configuration/ocpp_sensors.yaml`:
 │   │   ├── README.md               # Setup guide
 │   │   ├── vinfast-wall-panel.yaml # Dashboard YAML
 │   │   └── setup.py                # Interactive setup script
-│   └── vinfast_dashboard.yaml      # OCPP charger dashboard (optional)
+│   ├── vinfast_dashboard.yaml      # OCPP charger dashboard (optional)
+│   ├── vinfast-control-panel.html  # Web control panel (standalone)
+│   ├── vinfast-control-panel.yaml  # HA dashboard control panel
+│   └── CONTROL_PANEL_README.md      # Control panel setup guide
 ├── ocpp-setup/                     # OCPP charger setup (OPTIONAL)
 │   └── README.md                   # OCPP setup guide
 ├── configuration/
@@ -147,6 +151,21 @@ Edit these values in `configuration/ocpp_sensors.yaml`:
 ```
 
 ## Dashboard Features
+
+### Control Panel (New!)
+A comprehensive web-based control panel for managing your integration:
+- Monitor connection status and update intervals
+- Configure polling intervals (normal and charging)
+- Control OCPP charger (start/stop, availability, max current)
+- Control climate (if remote control is paired)
+- View vehicle information at a glance
+- Trigger manual data refreshes
+
+**Two versions available:**
+- **Standalone HTML** - Works in any browser, uses HA API tokens
+- **Home Assistant Dashboard** - Native HA integration, no tokens needed
+
+**[View Control Panel Setup Guide](dashboards/CONTROL_PANEL_README.md)**
 
 ### Wall Panel Dashboard (Recommended)
 A beautiful glassmorphism-style dashboard for Nest Hub and tablet displays:
@@ -207,6 +226,14 @@ Actual calculations become available after driving and will show:
 - Clear browser cache (Cmd+Shift+R)
 - Restart Home Assistant
 - Check logs for errors
+
+## Documentation
+
+- **[Architecture Review](ARCHITECTURE.md)** - Comprehensive architecture documentation and code review
+- **[Control Panel Guide](dashboards/CONTROL_PANEL_README.md)** - Setup and usage for the web control panel
+- **[Wall Panel Guide](dashboards/wall-panel/README.md)** - Wall panel dashboard setup
+- **[OCPP Setup Guide](ocpp-setup/README.md)** - OCPP charger integration guide
+- **[OCPP Data Points](integrations/ocpp/OCPP_DATA_POINTS.md)** - Complete OCPP entity reference
 
 ## Contributing
 

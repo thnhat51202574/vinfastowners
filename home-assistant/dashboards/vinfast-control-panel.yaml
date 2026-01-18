@@ -1,0 +1,311 @@
+# =============================================================================
+# VinFast Control Panel Dashboard
+# =============================================================================
+# A comprehensive control panel for managing your VinFast integration
+#
+# Installation:
+#   1. Go to Settings → Dashboards
+#   2. Click "Add Dashboard" → "New dashboard from scratch"
+#   3. Click three dots → "Edit Dashboard" → "Raw configuration editor"
+#   4. Paste this entire file
+#   5. Save
+#
+# Customization:
+#   - Update entity IDs to match your setup
+#   - Adjust card positions as needed
+#   - Remove cards for features you don't use
+# =============================================================================
+
+title: VinFast Control Panel
+path: vinfast-control
+icon: mdi:car-electric
+panel: false
+views:
+  - title: Control Panel
+    path: control
+    icon: mdi:tune
+    cards:
+      # Connection Status Card
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## 🔌 Connection Status
+          - type: entities
+            entities:
+              - entity: sensor.vinfast_battery_level
+                name: Connection Status
+                icon: mdi:connection
+              - entity: sensor.vinfast_battery_level
+                name: Last Update
+                secondary_info: last-changed
+              - type: custom:button-card
+                entity: sensor.vinfast_battery_level
+                name: Refresh Now
+                icon: mdi:refresh
+                tap_action:
+                  action: call-service
+                  service: homeassistant.update_entity
+                  service_data:
+                    entity_id: sensor.vinfast_battery_level
+                styles:
+                  card:
+                    - height: 60px
+                  icon:
+                    - color: '#667eea'
+          - type: markdown
+            content: |
+              **Note:** Update intervals are configured in Integration Options.
+              Go to Settings → Devices & Services → VinFast → Configure
+
+      # Polling Configuration Card
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## ⚙️ Polling Configuration
+          - type: entities
+            entities:
+              - type: custom:button-card
+                entity: input_number.vinfast_normal_interval
+                name: Normal Interval
+                icon: mdi:timer-outline
+                tap_action:
+                  action: navigate
+                  navigation_path: /config/integrations/integration/vinfast
+                styles:
+                  card:
+                    - height: 60px
+              - type: custom:button-card
+                entity: input_number.vinfast_charging_interval
+                name: Charging Interval
+                icon: mdi:lightning-bolt
+                tap_action:
+                  action: navigate
+                  navigation_path: /config/integrations/integration/vinfast
+                styles:
+                  card:
+                    - height: 60px
+          - type: markdown
+            content: |
+              **Current Settings:**
+              - Normal: Configured in integration options
+              - Charging: Configured in integration options
+              - OCPP Entity: Configured in integration options
+
+      # Vehicle Information Card
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## 🚗 Vehicle Information
+          - type: gauge
+            entity: sensor.vinfast_battery_level
+            name: Battery Level
+            min: 0
+            max: 100
+            severity:
+              green: 50
+              yellow: 20
+              red: 0
+          - type: entities
+            entities:
+              - entity: sensor.vinfast_range
+                name: Range
+              - entity: sensor.vinfast_odometer
+                name: Odometer
+              - entity: sensor.vinfast_charging_status
+                name: Charging Status
+              - entity: binary_sensor.vinfast_locked
+                name: Lock Status
+              - entity: sensor.vinfast_speed
+                name: Speed
+              - entity: sensor.vinfast_gear
+                name: Gear
+
+      # OCPP Charger Control Card (if OCPP is configured)
+      - type: conditional
+        conditions:
+          - entity: sensor.charger_status_connector
+            state_not: unavailable
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                ## ⚡ OCPP Charger Control
+            - type: gauge
+              entity: sensor.charger_power_active_import
+              name: Charging Power
+              min: 0
+              max: 11
+              unit: kW
+            - type: entities
+              entities:
+                - entity: sensor.charger_status_connector
+                  name: Status
+                - entity: sensor.charger_energy_session
+                  name: Session Energy
+                - entity: sensor.charger_current_import
+                  name: Current
+                - entity: number.charger_maximum_current
+                  name: Max Current
+            - type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  entity: switch.charger_availability
+                  name: Availability
+                  icon: mdi:power
+                  tap_action:
+                    action: toggle
+                  styles:
+                    card:
+                      - height: 80px
+                    icon:
+                      - color: |
+                          [[[
+                            if (entity.state === 'on') return 'green';
+                            return 'red';
+                          ]]]
+                - type: custom:button-card
+                  entity: switch.charger_charge_control
+                  name: Charge Control
+                  icon: mdi:lightning-bolt
+                  tap_action:
+                    action: toggle
+                  styles:
+                    card:
+                      - height: 80px
+                    icon:
+                      - color: |
+                          [[[
+                            if (entity.state === 'on') return 'green';
+                            return 'red';
+                          ]]]
+            - type: entities
+              entities:
+                - entity: number.charger_maximum_current
+                  name: Maximum Current (Amps)
+
+      # Climate Control Card (if paired)
+      - type: conditional
+        conditions:
+          - entity: switch.vinfast_climate
+            state_not: unavailable
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                ## ❄️ Climate Control
+            - type: entities
+              entities:
+                - entity: sensor.vinfast_inside_temp
+                  name: Inside Temperature
+                - entity: sensor.vinfast_outside_temp
+                  name: Outside Temperature
+            - type: custom:button-card
+              entity: switch.vinfast_climate
+              name: Climate Control
+              icon: mdi:air-conditioner
+              tap_action:
+                action: toggle
+              styles:
+                card:
+                  - height: 80px
+                icon:
+                  - color: |
+                      [[[
+                        if (entity.state === 'on') return 'blue';
+                        return 'gray';
+                      ]]]
+
+      # Quick Actions Card
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## 🎯 Quick Actions
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                name: Refresh Data
+                icon: mdi:refresh
+                tap_action:
+                  action: call-service
+                  service: homeassistant.update_entity
+                  service_data:
+                    entity_id: sensor.vinfast_battery_level
+                styles:
+                  card:
+                    - height: 80px
+                  icon:
+                    - color: '#667eea'
+              - type: custom:button-card
+                name: Integration Options
+                icon: mdi:cog
+                tap_action:
+                  action: navigate
+                  navigation_path: /config/integrations/integration/vinfast
+                styles:
+                  card:
+                    - height: 80px
+                  icon:
+                    - color: '#667eea'
+              - type: custom:button-card
+                name: Pair Remote
+                icon: mdi:qrcode
+                tap_action:
+                  action: navigate
+                  navigation_path: /config/integrations/integration/vinfast
+                styles:
+                  card:
+                    - height: 80px
+                  icon:
+                    - color: '#667eea'
+
+      # Status Summary Card
+      - type: markdown
+        content: |
+          ## 📊 Status Summary
+          
+          **Vehicle Status:**
+          - Battery: {{ states('sensor.vinfast_battery_level') }}%
+          - Range: {{ states('sensor.vinfast_range') }} miles
+          - Charging: {{ states('sensor.vinfast_charging_status') }}
+          
+          **Last Update:** {{ relative_time(states.sensor.vinfast_battery_level.last_updated) }} ago
+          
+          {% if states('sensor.charger_status_connector') != 'unavailable' %}
+          **OCPP Charger:**
+          - Status: {{ states('sensor.charger_status_connector') }}
+          - Power: {{ states('sensor.charger_power_active_import') }} kW
+          - Energy: {{ states('sensor.charger_energy_session') }} kWh
+          {% endif %}
+
+# =============================================================================
+# Notes:
+# =============================================================================
+# 1. Update entity IDs to match your setup:
+#    - sensor.vinfast_* → your actual VinFast entity names
+#    - sensor.charger_* → your actual OCPP entity names
+#
+# 2. Required Custom Cards (install via HACS):
+#    - button-card (for custom buttons)
+#
+# 3. Optional: Add input_number entities for polling intervals:
+#    input_number:
+#      vinfast_normal_interval:
+#        name: "Normal Polling Interval"
+#        min: 3600
+#        max: 43200
+#        step: 3600
+#        initial: 9000
+#        unit_of_measurement: "seconds"
+#
+# 4. To use this dashboard:
+#    - Copy entire content
+#    - Go to Settings → Dashboards
+#    - Add new dashboard → Raw configuration editor
+#    - Paste and save
+# =============================================================================
